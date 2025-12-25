@@ -1,5 +1,6 @@
 package com.wiesel.client;
 
+import com.wiesel.client.command.CommandManager;
 import com.wiesel.client.config.ConfigManager;
 import com.wiesel.client.pathfinder.AutoMapLoader;
 import com.wiesel.client.pathfinder.PathWalker;
@@ -23,6 +24,9 @@ public class WieselClient implements ClientModInitializer {
 
         // Load config
         ConfigManager.load();
+
+        // Register commands
+        CommandManager.register();
 
         // Initialize pathfinder
         PathfinderManager.initialize();
