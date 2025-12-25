@@ -1,6 +1,5 @@
 plugins {
     id("fabric-loom") version "1.8-SNAPSHOT"
-    kotlin("jvm") version "2.0.21"
     java
 }
 
@@ -21,7 +20,6 @@ dependencies {
     mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("fabric_kotlin_version")}")
 }
 
 tasks {
@@ -34,12 +32,6 @@ tasks {
 
     withType<JavaCompile> {
         options.release.set(21)
-    }
-
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "21"
-        }
     }
 
     jar {
