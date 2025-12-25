@@ -1,38 +1,130 @@
 # Wiesel Client
 
-A powerful Minecraft 1.21.1 Fabric client mod.
+A powerful Minecraft 1.21.1 Fabric client mod with advanced pathfinding capabilities.
+
+## Features
+
+- **Advanced Pathfinding**: Rust-powered pathfinder with HTTP API
+- **Visual Path Rendering**: Green line rendering along paths with block highlights every 15 nodes
+- **Automatic Walking**: Smart rotation and movement with jump detection
+- **Config System**: Clean JSON config in instance directory
+- **Welcome Message**: Gradient green welcome message on server join
+
+## Setup
+
+### 1. Install the Mod
+
+Place `wiesel-client-1.0.0.jar` in your `.minecraft/mods` folder.
+
+### 2. Setup Pathfinder (Required)
+
+1. Download `Pathfinding.exe` and place it in your **Downloads** folder: `C:\Users\YourName\Downloads\Pathfinding.exe`
+
+2. Download map files and place them in your **Downloads** folder:
+   - `hub.zip`
+   - `mines.zip`
+   - `galatea.zip`
+
+The mod will automatically:
+- Extract maps to `.minecraft/maps/` on first launch
+- Start the Pathfinding.exe process
+- Send keepalive requests every 60 seconds
+
+## Usage
+
+### Configuration
+
+Config file: `.minecraft/config/wiesel/config.json`
+
+```json
+{
+  "pathfinder": {
+    "autoStart": true,
+    "defaultMap": "hub",
+    "keepaliveInterval": 60000
+  },
+  "render": {
+    "enabled": true,
+    "pathLineColor": 43520,
+    "nodeHighlightColor": 65280,
+    "nodeHighlightInterval": 15,
+    "pathLineWidth": 2.0,
+    "nodeAlpha": 0.5
+  }
+}
+```
+
+### API Usage (For Developers)
+
+```java
+// Load a map
+PathfinderManager.loadMap("hub");
+
+// Find a path
+PathfindResponse path = PathfinderManager.pathfind(x1, y1, z1, x2, y2, z2);
+
+// Advanced pathfinding with options
+PathfindResponse path = PathfinderManager.pathfind(
+    x1, y1, z1,
+    x2, y2, z2,
+    false, // useWarpPoints
+    false, // useEtherwarp
+    true,  // useKeynodes
+    false, // useSpline
+    false  // isPerfectPath
+);
+
+// Start auto-walking
+PathWalker.startWalking(path);
+
+// Stop walking
+PathWalker.stopWalking();
+
+// Clear rendered path
+PathfinderManager.clearPath();
+```
+
+### Pathfinder API Details
+
+The pathfinder runs locally on `http://localhost:3000` and provides these endpoints:
+
+- `GET /api/loadmap?map={mapname}` - Load a map
+- `POST /api/pathfind` - Calculate a path
+- `GET /keepalive` - Keep the process alive (sent automatically)
+
+**Request Body** for `/api/pathfind`:
+```json
+{
+  "start": "x,y,z",
+  "end": "x,y,z",
+  "use_warp_points": false,
+  "use_etherwarp": false,
+  "use_keynodes": true,
+  "use_spline": false,
+  "is_perfect_path": false
+}
+```
 
 ## Project Structure
 
 ```
 wiesel-client/
-├── src/main/
-│   ├── java/com/wiesel/client/
-│   │   ├── WieselClient.java           # Main mod entry point
-│   │   ├── pathfinder/
-│   │   │   └── PathfinderManager.java  # Rust pathfinder integration
-│   │   └── mixin/
-│   │       └── MixinClientPlayerEntity.java
-│   ├── kotlin/com/wiesel/client/
-│   │   └── rendering/                  # Rendering utilities (12 files)
-│   │       ├── DeferredDrawer.kt
-│   │       ├── LineDrawer.kt
-│   │       ├── WorldRenderUtils.kt
-│   │       ├── WieselRenderLayers.kt
-│   │       └── ... (8 more)
-│   └── resources/
-│       ├── natives/                     # Place Rust pathfinder here
-│       ├── fabric.mod.json
-│       └── wieselclient.mixins.json
-├── build.gradle.kts
-└── gradle.properties
+├── src/main/java/com/wiesel/client/
+│   ├── WieselClient.java               # Main mod entry
+│   ├── config/
+│   │   ├── ConfigManager.java          # Config system
+│   │   └── WieselConfig.java           # Config data class
+│   ├── pathfinder/
+│   │   ├── PathfinderManager.java      # HTTP client & process management
+│   │   ├── PathNode.java               # Path node data
+│   │   ├── PathfindResponse.java       # API response
+│   │   └── PathWalker.java             # Automatic walking & rotation
+│   ├── rendering/
+│   │   └── PathRenderer.java           # Path visualization
+│   └── mixin/
+│       ├── MixinClientPlayerEntity.java
+│       └── MixinWorldRenderer.java     # Rendering injection
 ```
-
-## Features
-
-- **Welcome Message**: Toxic green gradient effect when joining servers
-- **Pathfinding**: Rust pathfinder integration (cross-platform)
-- **Rendering**: Professional rendering utilities with Wiesel branding
 
 ## Building
 
@@ -40,32 +132,28 @@ wiesel-client/
 ./gradlew build
 ```
 
+Output: `build/libs/wiesel-client-1.0.0.jar`
+
 ## Development
 
 ```bash
 ./gradlew runClient
 ```
 
-## Adding Rust Pathfinder
+## Troubleshooting
 
-Place your executable in `src/main/resources/natives/`:
-- `pathfinder.exe` (Windows)
-- `pathfinder-mac` (macOS)
-- `pathfinder-linux` (Linux)
+**Pathfinder not starting:**
+- Ensure `Pathfinding.exe` is in your Downloads folder
+- Check logs for errors
 
-## Collaboration
+**Maps not loading:**
+- Ensure map zip files are in Downloads folder
+- Maps will be extracted to `.minecraft/maps/`
+- Check that map JSON files exist in `.minecraft/maps/{mapname}/`
 
-Pull changes:
-```bash
-git pull origin master
-```
-
-Push changes:
-```bash
-git add .
-git commit -m "Your changes"
-git push origin master
-```
+**Path not rendering:**
+- Check that rendering is enabled in config
+- Ensure you have a valid path calculated
 
 ## License
 
