@@ -26,7 +26,7 @@ public class WieselClient implements ClientModInitializer {
             var player = client.player;
             if (player == null) return;
 
-            String playerName = player.getGameProfile().getName();
+            String playerName = player.getName().getString();
             client.execute(() -> {
                 player.sendMessage(createWelcomeMessage(playerName), false);
             });
