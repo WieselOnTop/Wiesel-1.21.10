@@ -35,8 +35,26 @@ public class PathfinderManager {
     private static PathfindResponse lastPath = null;
 
     public static void initialize() {
-        extractMapsIfNeeded();
-        startPathfinder();
+        // Extract maps in background thread to avoid blocking
+        new Thread(() -> {
+            try {
+                extractMapsIfNeeded();
+            } catch (Exception e) {
+                WieselClient.LOGGER.error("Error extracting maps", e);
+            }
+        }, "WieselMapExtractor").start();
+
+        // Start pathfinder process
+        new Thread(() -> {
+            try {
+                Thread.sleep(1000); // Wait a moment for maps to start extracting
+                startPathfinder();
+            } catch (Exception e) {
+                WieselClient.LOGGER.error("Error starting pathfinder", e);
+            }
+        }, "WieselPathfinderStarter").start();
+
+        // Start keepalive timer
         startKeepaliveTimer();
     }
 
@@ -47,10 +65,14 @@ public class PathfinderManager {
             WieselClient.LOGGER.info("Created maps directory: {}", mapsDir.getAbsolutePath());
         }
 
+        WieselClient.LOGGER.info("Starting map extraction from Downloads folder...");
+
         // Extract bundled maps
         extractMapFromDownloads("hub.zip", mapsDir);
         extractMapFromDownloads("mines.zip", mapsDir);
         extractMapFromDownloads("galatea.zip", mapsDir);
+
+        WieselClient.LOGGER.info("Map extraction completed");
     }
 
     private static void extractMapFromDownloads(String zipName, File targetDir) {

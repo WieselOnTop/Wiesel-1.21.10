@@ -5,10 +5,12 @@ A powerful Minecraft 1.21.1 Fabric client mod with advanced pathfinding capabili
 ## Features
 
 - **Advanced Pathfinding**: Rust-powered pathfinder with HTTP API
+- **Automatic Map Loading**: Detects current area from tablist and loads the correct map automatically
 - **Visual Path Rendering**: Green line rendering along paths with block highlights every 15 nodes
 - **Automatic Walking**: Smart rotation and movement with jump detection
 - **Config System**: Clean JSON config in instance directory
 - **Welcome Message**: Gradient green welcome message on server join
+- **Background Processing**: Map extraction and loading happen in separate threads
 
 ## Setup
 
@@ -26,9 +28,11 @@ Place `wiesel-client-1.0.0.jar` in your `.minecraft/mods` folder.
    - `galatea.zip`
 
 The mod will automatically:
-- Extract maps to `.minecraft/maps/` on first launch
+- Extract maps to `.minecraft/maps/` on first launch (in background thread)
 - Start the Pathfinding.exe process
 - Send keepalive requests every 60 seconds
+- **Detect your current area from the tablist** (looks for "Area: Hub", "Area: Mines", etc.)
+- **Automatically load the correct map** when you change areas
 
 ## Usage
 
@@ -54,10 +58,19 @@ Config file: `.minecraft/config/wiesel/config.json`
 }
 ```
 
+### How It Works
+
+The mod automatically detects your current area by reading the tablist:
+- When it sees "Area: Hub" → Loads `hub` map
+- When it sees "Area: Mines" → Loads `mines` map
+- When it sees "Area: Galatea" → Loads `galatea` map
+
+**You don't need to manually load maps!** Just join the server and the mod handles everything.
+
 ### API Usage (For Developers)
 
 ```java
-// Load a map
+// Maps are loaded automatically, but you can manually load if needed
 PathfinderManager.loadMap("hub");
 
 // Find a path

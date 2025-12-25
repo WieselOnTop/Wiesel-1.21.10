@@ -1,6 +1,7 @@
 package com.wiesel.client;
 
 import com.wiesel.client.config.ConfigManager;
+import com.wiesel.client.pathfinder.AutoMapLoader;
 import com.wiesel.client.pathfinder.PathWalker;
 import com.wiesel.client.pathfinder.PathfinderManager;
 import net.fabricmc.api.ClientModInitializer;
@@ -47,11 +48,13 @@ public class WieselClient implements ClientModInitializer {
         // Disconnect event
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             PathWalker.stopWalking();
+            AutoMapLoader.reset();
         });
 
-        // Client tick event for path walking
+        // Client tick event for path walking and auto map loading
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             PathWalker.tick();
+            AutoMapLoader.tick();
         });
     }
 
