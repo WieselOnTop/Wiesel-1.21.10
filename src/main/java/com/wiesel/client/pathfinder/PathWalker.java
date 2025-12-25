@@ -1,9 +1,9 @@
 package com.wiesel.client.pathfinder;
 
 import com.wiesel.client.WieselClient;
+import com.wiesel.client.rotation.RotationManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
@@ -13,6 +13,7 @@ public class PathWalker {
     private static int currentNodeIndex = 0;
     private static boolean isWalking = false;
     private static final double REACH_THRESHOLD = 1.0; // Distance to consider node reached
+    private static final RotationManager rotationManager = new RotationManager();
 
     public static void startWalking(PathfindResponse path) {
         if (path == null || path.path == null || path.path.isEmpty()) {
@@ -23,6 +24,7 @@ public class PathWalker {
         currentPath = path.path;
         currentNodeIndex = 0;
         isWalking = true;
+        rotationManager.setPath(path.path);
         WieselClient.LOGGER.info("Started walking path with {} nodes", currentPath.size());
     }
 
@@ -30,6 +32,7 @@ public class PathWalker {
         isWalking = false;
         currentPath = null;
         currentNodeIndex = 0;
+        rotationManager.stop();
         WieselClient.LOGGER.info("Stopped walking");
     }
 
@@ -62,6 +65,7 @@ public class PathWalker {
         // Check if we reached the current node
         if (distance < REACH_THRESHOLD) {
             currentNodeIndex++;
+            rotationManager.setCurrentNodeIndex(currentNodeIndex);
             if (currentNodeIndex < currentPath.size()) {
                 WieselClient.LOGGER.debug("Reached node {}/{}", currentNodeIndex, currentPath.size());
                 targetNode = currentPath.get(currentNodeIndex);
@@ -72,9 +76,7 @@ public class PathWalker {
             }
         }
 
-        // Calculate rotation to target
-        rotateTo(player, targetPos);
-
+        // Rotation is handled by RotationManager in the render event
         // Move forward
         player.input.pressingForward = true;
         player.input.movementForward = 1.0f;
@@ -85,29 +87,8 @@ public class PathWalker {
         }
     }
 
-    private static void rotateTo(ClientPlayerEntity player, Vec3d target) {
-        Vec3d playerPos = player.getPos();
-        Vec3d eyePos = playerPos.add(0, player.getEyeHeight(player.getPose()), 0);
-
-        double deltaX = target.x - eyePos.x;
-        double deltaY = target.y - eyePos.y;
-        double deltaZ = target.z - eyePos.z;
-
-        double distanceXZ = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-
-        // Calculate yaw (horizontal rotation)
-        float yaw = (float) Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90.0f;
-
-        // Calculate pitch (vertical rotation)
-        float pitch = (float) -Math.toDegrees(Math.atan2(deltaY, distanceXZ));
-
-        // Normalize angles
-        yaw = MathHelper.wrapDegrees(yaw);
-        pitch = MathHelper.clamp(pitch, -90.0f, 90.0f);
-
-        // Set player rotation
-        player.setYaw(yaw);
-        player.setPitch(pitch);
+    public static RotationManager getRotationManager() {
+        return rotationManager;
     }
 
     public static boolean isWalking() {

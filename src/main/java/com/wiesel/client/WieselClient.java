@@ -18,8 +18,19 @@ public class WieselClient implements ClientModInitializer {
     public static final String MOD_NAME = "Wiesel Client";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
+    private static WieselClient instance;
+
+    public static WieselClient getInstance() {
+        return instance;
+    }
+
+    public ConfigManager getConfigManager() {
+        return new ConfigManager();
+    }
+
     @Override
     public void onInitializeClient() {
+        instance = this;
         LOGGER.info("Initializing {}", MOD_NAME);
 
         // Load config
