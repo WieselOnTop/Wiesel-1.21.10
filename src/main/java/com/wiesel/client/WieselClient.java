@@ -36,12 +36,12 @@ public class WieselClient implements ClientModInitializer {
     private Text createWelcomeMessage(String playerName) {
         Text message = Text.literal("");
 
-        // "Wiesel Client" with darker toxic green gradient effect
+        // "Wiesel Client" with darker green gradient effect with noticeable variations
         int[] colors = {
-            0x00DD00, 0x00E000, 0x00E300, 0x00E600,
-            0x00E900, 0x00EC00, 0x00EF00, 0x00F200,
-            0x00F500, 0x00F800, 0x00FB00, 0x00FE00,
-            0x00DD00
+            0x00AA00, 0x00B500, 0x00C000, 0x00CB00,
+            0x00D600, 0x00E100, 0x00D600, 0x00CB00,
+            0x00C000, 0x00B500, 0x00AA00, 0x009F00,
+            0x00AA00
         };
 
         String text = "Wiesel Client";
