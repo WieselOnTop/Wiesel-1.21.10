@@ -1,6 +1,10 @@
 package com.wiesel.client;
 
+import com.wiesel.client.config.ConfigManager;
+import com.wiesel.client.pathfinder.PathWalker;
+import com.wiesel.client.pathfinder.PathfinderManager;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -16,12 +20,20 @@ public class WieselClient implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info("Initializing {}", MOD_NAME);
 
+        // Load config
+        ConfigManager.load();
+
+        // Initialize pathfinder
+        PathfinderManager.initialize();
+
+        // Register events
         registerEvents();
 
         LOGGER.info("{} initialized successfully", MOD_NAME);
     }
 
     private void registerEvents() {
+        // Welcome message on server join
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
             var player = client.player;
             if (player == null) return;
@@ -30,6 +42,16 @@ public class WieselClient implements ClientModInitializer {
             client.execute(() -> {
                 player.sendMessage(createWelcomeMessage(playerName), false);
             });
+        });
+
+        // Disconnect event
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            PathWalker.stopWalking();
+        });
+
+        // Client tick event for path walking
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            PathWalker.tick();
         });
     }
 
