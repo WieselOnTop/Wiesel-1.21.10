@@ -66,9 +66,10 @@ public class WieselClient implements ClientModInitializer {
             AutoMapLoader.reset();
         });
 
-        // Client tick event for path walking and auto map loading
+        // Client tick event for path walking, rotation, and auto map loading
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             PathWalker.tick();
+            PathWalker.getRotationManager().onRender();
             AutoMapLoader.tick();
         });
     }
