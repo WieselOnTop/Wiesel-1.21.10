@@ -36,11 +36,12 @@ public class WieselClient implements ClientModInitializer {
     private Text createWelcomeMessage(String playerName) {
         Text message = Text.literal("");
 
-        // "Wiesel Client" with toxic green gradient effect
+        // "Wiesel Client" with darker toxic green gradient effect
         int[] colors = {
-            0x39FF14, 0x3DFF18, 0x41FF1C, 0x45FF20,
-            0x49FF24, 0x4DFF28, 0x51FF2C, 0x55FF30,
-            0x59FF34, 0x5DFF38, 0x61FF3C, 0x65FF40
+            0x00DD00, 0x00E000, 0x00E300, 0x00E600,
+            0x00E900, 0x00EC00, 0x00EF00, 0x00F200,
+            0x00F500, 0x00F800, 0x00FB00, 0x00FE00,
+            0x00DD00
         };
 
         String text = "Wiesel Client";
@@ -57,13 +58,13 @@ public class WieselClient implements ClientModInitializer {
             Text.literal(" >> ").styled(style -> style.withColor(0x555555))
         );
 
-        // "Hello [PlayerName]"
+        // "Hello [PlayerName]" - both white
         message = ((net.minecraft.text.MutableText) message).append(
             Text.literal("Hello ").styled(style -> style.withColor(0xFFFFFF))
         );
 
         message = ((net.minecraft.text.MutableText) message).append(
-            Text.literal(playerName).styled(style -> style.withColor(0x39FF14))
+            Text.literal(playerName).styled(style -> style.withColor(0xFFFFFF))
         );
 
         return message;
